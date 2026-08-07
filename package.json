@@ -1,0 +1,45 @@
+{
+  "name": "joymap",
+  "version": "0.6.0",
+  "description": "Lightweight enterprise WebGL 2D map engine",
+  "type": "module",
+  "private": true,
+  "main": "./dist/joymap.umd.cjs",
+  "module": "./dist/joymap.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/joymap.js",
+      "require": "./dist/joymap.umd.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite --config vite.playground.config.ts",
+    "build": "vite build && tsc -p tsconfig.build.json",
+    "preview": "vite preview --config vite.playground.config.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/earcut": "^3.0.0",
+    "@types/node": "^26.1.2",
+    "typescript": "5.9.3",
+    "vite": "^8.2.1"
+  },
+  "keywords": [
+    "map",
+    "webgl",
+    "gis",
+    "tiles",
+    "web-mercator"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "earcut": "^3.2.3"
+  }
+}
