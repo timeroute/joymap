@@ -4,9 +4,9 @@ const CSS = `
 .joymap-overlay{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 .joymap-symbol-layer{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 .joymap-label{position:absolute;left:0;top:0;white-space:nowrap;font:600 13px/1.2 "Segoe UI","PingFang SC","Hiragino Sans GB","Noto Sans SC",system-ui,sans-serif;pointer-events:none;user-select:none;z-index:1}
-.joymap-marker{position:absolute;transform:translate(-50%,-100%);pointer-events:auto;cursor:pointer;z-index:2}
-.joymap-marker-default{width:22px;height:22px;margin-left:0;border-radius:50% 50% 50% 0;background:#e85d4c;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35);transform:translate(-50%,-100%) rotate(-45deg)}
-.joymap-popup{position:absolute;transform:translate(-50%,calc(-100% - 12px));pointer-events:auto;z-index:3;max-width:240px;background:#fff;color:#1a1a1a;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,.25);font:13px/1.4 system-ui,sans-serif}
+.joymap-marker{position:absolute;left:0;top:0;pointer-events:auto;cursor:pointer;z-index:2;will-change:transform}
+.joymap-marker-default{width:22px;height:22px;margin-left:0;border-radius:50% 50% 50% 0;background:#e85d4c;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.joymap-popup{position:absolute;left:0;top:0;pointer-events:auto;z-index:3;max-width:240px;background:#fff;color:#1a1a1a;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,.25);font:13px/1.4 system-ui,sans-serif;will-change:transform}
 .joymap-popup-content{padding:10px 28px 10px 12px}
 .joymap-popup-close{position:absolute;top:4px;right:6px;border:0;background:transparent;font-size:16px;cursor:pointer;line-height:1;color:#666}
 .joymap-popup-tip{position:absolute;left:50%;bottom:-6px;width:12px;height:12px;background:#fff;transform:translateX(-50%) rotate(45deg);box-shadow:2px 2px 2px rgba(0,0,0,.06)}
@@ -25,13 +25,15 @@ const CSS = `
 .joymap-ctrl-attrib-inner{padding-top:2px}
 `;
 
-let injected = false;
+let injected: HTMLStyleElement | null = null;
 
 export function ensureMapCss(): void {
-  if (injected || typeof document === "undefined") return;
-  injected = true;
-  const style = document.createElement("style");
-  style.setAttribute("data-joymap", "css");
-  style.textContent = CSS;
-  document.head.appendChild(style);
+  if (typeof document === "undefined") return;
+  if (!injected) {
+    injected = document.createElement("style");
+    injected.setAttribute("data-joymap", "css");
+    document.head.appendChild(injected);
+  }
+  // Always refresh so HMR / successive injects pick up CSS changes.
+  injected.textContent = CSS;
 }

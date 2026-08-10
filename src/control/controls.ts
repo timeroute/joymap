@@ -21,12 +21,12 @@ export class NavigationControl implements IControl {
     el.querySelector(".joymap-ctrl-zoom-in")!.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      map.easeTo({ zoom: map.getZoom() + 1, duration: 300 });
+      map.easeTo({ zoom: map.getZoom() + 1, duration: 400 });
     });
     el.querySelector(".joymap-ctrl-zoom-out")!.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      map.easeTo({ zoom: map.getZoom() - 1, duration: 300 });
+      map.easeTo({ zoom: map.getZoom() - 1, duration: 400 });
     });
     const compass = el.querySelector(".joymap-ctrl-compass") as HTMLElement;
     this._compass = compass.querySelector(

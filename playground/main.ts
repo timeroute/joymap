@@ -213,7 +213,7 @@ map.addLayer({
   },
 });
 
-const popup = new Popup({ offset: [0, -8] });
+const popup = new Popup({ offset: [0, 0] });
 const marker = new Marker().setLngLat([116.397, 39.908]).addTo(map);
 
 const destinations: Array<{
@@ -275,8 +275,18 @@ map.on("click", (e) => {
     hit.properties && typeof hit.properties.name === "string"
       ? hit.properties.name
       : hit.layer.type;
+  // Point layers: anchor on the feature, not the click pixel — otherwise zoom
+  // separates the popup from the circle/label (they share different lng/lats).
+  let lngLat: [number, number] | typeof e.lngLat = e.lngLat;
+  const g = hit.geometry;
+  if (g?.type === "Point") {
+    lngLat = [g.coordinates[0], g.coordinates[1]];
+  } else if (g?.type === "MultiPoint" && g.coordinates[0]) {
+    const c = g.coordinates[0];
+    lngLat = [c[0], c[1]];
+  }
   popup
-    .setLngLat(e.lngLat)
+    .setLngLat(lngLat)
     .setHTML(
       `<strong>${name}</strong><br/><span style="color:#666">${hit.layer.id}</span>`,
     )
