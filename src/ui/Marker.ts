@@ -37,7 +37,7 @@ export class Marker {
   }
 
   setLngLat(lngLat: LngLatLike): this {
-    this._lngLat = LngLat.convert(lngLat);
+    this._lngLat = LngLat.convert(lngLat).clone();
     this._update();
     return this;
   }
@@ -62,7 +62,13 @@ export class Marker {
   _update(): void {
     if (!this._map) return;
     const p = this._map.project(this._lngLat);
-    this._element.style.left = `${p.x + this._offset[0]}px`;
-    this._element.style.top = `${p.y + this._offset[1]}px`;
+    const x = p.x + this._offset[0];
+    const y = p.y + this._offset[1];
+    const isPin = this._element.classList.contains("joymap-marker-default");
+    // Pin rotates about its tip (bottom-center) so the point stays on the lng/lat.
+    this._element.style.transformOrigin = isPin ? "50% 100%" : "50% 100%";
+    this._element.style.transform = isPin
+      ? `translate(${x}px, ${y}px) translate(-50%, -100%) rotate(-45deg)`
+      : `translate(${x}px, ${y}px) translate(-50%, -100%)`;
   }
 }

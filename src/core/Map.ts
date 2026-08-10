@@ -168,6 +168,13 @@ export class Map extends Evented<MapEvents> {
     this._basemap.attachGL(this._renderer.gl);
     this.transform.tileSize = source?.tileSize ?? 256;
 
+    this._scroll = new ScrollZoomHandler(
+      this.canvas,
+      this.transform,
+      () => this._beginUserGesture({ zoom: true }),
+      () => this._onZoom(),
+      () => this._endUserGesture(),
+    );
     this._touch = new TouchGestureHandler(
       this.canvas,
       this.transform,
@@ -179,6 +186,7 @@ export class Map extends Evented<MapEvents> {
       () => {
         this._cancelPendingClick();
         this._pointerDown = null;
+        this._scroll.finish();
         this._beginUserGesture({ zoom: true, bearing: true });
       },
       () => this._endUserGesture(),
@@ -186,22 +194,18 @@ export class Map extends Evented<MapEvents> {
     this._drag = new DragPanHandler(
       this.canvas,
       this.transform,
-      () => this._beginUserGesture(),
+      () => {
+        this._scroll.finish();
+        this._beginUserGesture();
+      },
       () => this._onMove(),
       () => this._endUserGesture(),
       () => this._touch.isActive || this._touch.isTouching,
     );
-    this._scroll = new ScrollZoomHandler(
-      this.canvas,
-      this.transform,
-      () => this._beginUserGesture({ zoom: true }),
-      () => this._onZoom(),
-      () => this._endUserGesture(),
-    );
     this._dblClick = new DoubleClickZoomHandler(
       this.canvas,
       (nextZoom, around) => {
-        this.easeTo({ zoom: nextZoom, around, duration: 350 });
+        this.easeTo({ zoom: nextZoom, around, duration: 400 });
       },
       () => this.getZoom(),
       () => this._cancelPendingClick(),
@@ -209,7 +213,10 @@ export class Map extends Evented<MapEvents> {
     this._dragRotate = new DragRotateHandler(
       this.canvas,
       this.transform,
-      () => this._beginUserGesture({ bearing: true }),
+      () => {
+        this._scroll.finish();
+        this._beginUserGesture({ bearing: true });
+      },
       () => this._onRotate(),
       () => this._endUserGesture(),
     );
@@ -915,6 +922,8 @@ export class Map extends Evented<MapEvents> {
         if (layer.visible === false) continue;
         layer.render(this._renderer, this._vectors, this.transform);
       }
+      // Keep HTML overlays in sync with the painted camera every frame.
+      this._updateOverlays();
       this.fire("render", { type: "render" });
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));

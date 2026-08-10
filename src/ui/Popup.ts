@@ -46,7 +46,7 @@ export class Popup {
   }
 
   setLngLat(lngLat: LngLatLike): this {
-    this._lngLat = LngLat.convert(lngLat);
+    this._lngLat = LngLat.convert(lngLat).clone();
     this._update();
     return this;
   }
@@ -57,11 +57,13 @@ export class Popup {
 
   setHTML(html: string): this {
     this._content.innerHTML = html;
+    this._update();
     return this;
   }
 
   setText(text: string): this {
     this._content.textContent = text;
+    this._update();
     return this;
   }
 
@@ -85,10 +87,17 @@ export class Popup {
     return this._map !== null;
   }
 
+  /**
+   * Anchor the tip (bottom-center) on the projected lng/lat.
+   * Uses transform so left/top stay at 0 and tip clearance stays stable across zooms.
+   */
   _update(): void {
     if (!this._map) return;
     const p = this._map.project(this._lngLat);
-    this._element.style.left = `${p.x + this._offset[0]}px`;
-    this._element.style.top = `${p.y + this._offset[1]}px`;
+    const x = p.x + this._offset[0];
+    const y = p.y + this._offset[1];
+    // Tip diamond extends ~8px below the box; keep tip vertex on the anchor.
+    this._element.style.transform =
+      `translate(${x}px, ${y}px) translate(-50%, -100%) translateY(-8px)`;
   }
 }
